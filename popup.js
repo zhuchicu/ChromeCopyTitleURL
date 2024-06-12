@@ -22,7 +22,8 @@ function copyPageInfo() {
     var tab = tabs[0];
     var url = tab.url;
     var title = tab.title;
-    copyToClipboard(url + ' - ' + title);
+    var content = '[' + title + '](' + url + ')'
+    copyToClipboard(content);
   });
 }
 
