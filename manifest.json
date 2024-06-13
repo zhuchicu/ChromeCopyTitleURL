@@ -6,6 +6,16 @@
   "action": {
     "default_popup": "popup.html"
   },
+  "content_scripts": [{
+    "matches": [
+      "http://*/*",
+      "https://*/*",
+      "file:///*/*"
+    ],
+    "js": [
+      "vendors/pangu.min.js"
+    ],
+  }],
   "commands": {
     "copy-title-url": {
       "suggested_key": {
@@ -21,7 +31,15 @@
       "48": "images/icon-48.png",
       "128": "images/icon-128.png"
   },
-  "permissions": ["clipboardWrite", "activeTab", "contextMenus", "scripting"],
+  "permissions": [
+      "clipboardWrite", 
+      "activeTab", 
+      "contextMenus", 
+      "scripting",
+      "http://*/*",
+      "https://*/*",
+      "file:///*/*"
+  ],
   "background": {
     "service_worker": "background.js"
   }
