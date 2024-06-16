@@ -13,8 +13,10 @@
       "file:///*/*"
     ],
     "js": [
-      "vendors/pangu.min.js"
+      "vendors/pangu.min.js",
+      "content.js"
     ],
+    "run_at": "document_end"
   }],
   "commands": {
     "copy-title-url": {
@@ -35,10 +37,7 @@
       "clipboardWrite", 
       "activeTab", 
       "contextMenus", 
-      "scripting",
-      "http://*/*",
-      "https://*/*",
-      "file:///*/*"
+      "scripting"
   ],
   "background": {
     "service_worker": "background.js"
