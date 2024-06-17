@@ -29,7 +29,8 @@ button.addEventListener('click', function() {
   console.log('点击按钮时复制文本')
   const selectedText = window.getSelection().toString().trim();
   if (selectedText) {
-    navigator.clipboard.writeText(selectedText).then(() => {
+    const text = pangu.spacing(selectedText)
+    navigator.clipboard.writeText(text).then(() => {
       // alert('Text copied to clipboard!');
       button.style.display = 'none';
     });
