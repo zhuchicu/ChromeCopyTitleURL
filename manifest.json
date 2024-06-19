@@ -7,16 +7,12 @@
     "default_popup": "popup.html"
   },
   "content_scripts": [{
-    "matches": [
-      "http://*/*",
-      "https://*/*",
-      "file:///*/*"
-    ],
+    "matches": ["<all_urls>"],
     "js": [
       "vendors/pangu.min.js",
       "content.js"
     ],
-    "run_at": "document_end"
+    "css": ["styles.css"]
   }],
   "commands": {
     "copy-title-url": {
@@ -41,5 +37,10 @@
   ],
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "web_accessible_resources": [
+  {
+    "resources": ["images/logo.jpg"],
+    "matches": ["<all_urls>"]
+  }]
 }

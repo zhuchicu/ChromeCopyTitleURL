@@ -1,0 +1,8 @@
+#selection-icon {
+  width: 22px;
+  height: 22px;
+  position: absolute;
+  cursor: pointer;
+  z-index: 99999; 
+  pointer-events: auto;
+}
