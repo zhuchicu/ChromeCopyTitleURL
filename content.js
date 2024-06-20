@@ -18,6 +18,9 @@ document.addEventListener('mouseup', function(event) {
     icon.style.left = `${x}px`;
     icon.style.top = `${y}px`;
     icon.style.display = 'block';
+    setTimeout(function() {
+      icon.style.display = 'none';
+    }, 4000);
   } else {
     icon.style.display = 'none';
   }
