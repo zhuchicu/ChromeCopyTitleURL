@@ -4,7 +4,8 @@
   "version": "1.0",
   "description": "Copy title and url to clipboard",
   "action": {
-    "default_popup": "popup.html"
+    "default_title": "Click to open panel"
+    // "default_popup": "popup.html"
   },
   "content_scripts": [{
     "matches": ["<all_urls>"],
@@ -33,7 +34,9 @@
       "clipboardWrite", 
       "activeTab", 
       "contextMenus", 
-      "scripting"
+      "scripting",
+      "sidePanel",
+      "tabs"
   ],
   "background": {
     "service_worker": "background.js"
@@ -42,5 +45,8 @@
   {
     "resources": ["images/logo.jpg"],
     "matches": ["<all_urls>"]
-  }]
+  }],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  }
 }
