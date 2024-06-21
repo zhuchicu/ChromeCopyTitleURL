@@ -5,14 +5,16 @@ icon.id = 'selection-icon'
 icon.alt = 'Copy to clipboard';
 icon.style.display = 'none';
 document.body.appendChild(icon);
+console.log(`icon.src=${icon.src}`);
+
 
 // 监听鼠标释放事件
 document.addEventListener('mouseup', function(event) {
   console.log('监听鼠标释放事件')
   const selectedText = window.getSelection().toString().trim();
   if (selectedText.length > 0) {
-    const x = event.pageX;
-    const y = event.pageY;
+    const x = event.pageX + 10;
+    const y = event.pageY + 10;
     icon.style.left = `${x}px`;
     icon.style.top = `${y}px`;
     icon.style.display = 'block';

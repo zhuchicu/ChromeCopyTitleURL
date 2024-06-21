@@ -78,7 +78,7 @@ chrome.commands.onCommand.addListener((command) => {
 function copyPageInfoToClipboard() {
   var url = window.location.href;
   var title = document.title;
-  navigator.clipboard.writeText('[' + title + '](' + url + ')');
+  navigator.clipboard.writeText('来源：[' + title + '](' + url + ')');
 }
 
 

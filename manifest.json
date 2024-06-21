@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Copy Page Title",
+  "name": "ReadDraftHelper",
   "version": "1.0",
-  "description": "Copy title and url to clipboard",
+  "description": "Excerpt Buckets",
   "action": {
-    "default_title": "Click to open panel"
-    // "default_popup": "popup.html"
+    "default_title": "Click to open Bucket"
+      // "default_popup": "popup.html"
   },
   "content_scripts": [{
     "matches": ["<all_urls>"],
