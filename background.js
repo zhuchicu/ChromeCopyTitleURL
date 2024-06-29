@@ -1,49 +1,37 @@
 chrome.runtime.onInstalled.addListener(function () {
-  console.log('注册右键菜单事件监听')
+  // console.log('注册右键菜单事件监听')
   // 注册右键菜单事件监听
   chrome.contextMenus.create({
     id: 'copyPageURLTitle',
-    title: 'Copy Title URL (Ctrl+Shift+Y)',
-    contexts: ['page', 'selection']
+    title: '复制 Markdown 格式的链接引用 (Ctrl+Shift+Y)',
+    contexts: ['page']
   });
 
   // 打开侧栏
-  // chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+
+  // 注册右键菜单事件监听
   chrome.contextMenus.create({
-    id: 'mysidePanel',
-    title: 'Define mysidePanel',
-    contexts: ['page', 'selection']
+    id: 'sendToSidePanel',
+    title: '发送 SidePanel',
+    contexts: ['selection']
   });
 });
 
-function getMarkdownTitle(tab) {
-  const title = tab.title;
-  const url = tab.url;
-  const markdownTitle = `[${title}](${url})`;
-  return markdownTitle;
-}
 
-function sendTitleToSidePanel(tab, title) {
-  console.log('点击浏览器地址栏右侧 icon');
-  console.log(`markdownTitle: ${title}`);
-  console.log(`Current Window ID: ${tab.windowId}`);
-  
-  chrome.sidePanel.open({ tabId: tab.id });
-  // chrome.sidePanel.open({tabId: tab.id}, () => {
-  //   chrome.runtime.sendMessage({ action: "updateTitle", title: title });
-  // });
-}
+// function getMarkdownTitle(tab) {
+//   const title = tab.title;
+//   const url = tab.url;
+//   const markdownTitle = `[${title}](${url})`;
+//   return markdownTitle;
+// }
 
-// 注册浏览器地址栏右侧 icon 的点击事件
-chrome.action.onClicked.addListener((tab) => {
-  const markdownTitle = getMarkdownTitle(tab);
 
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    func: sendTitleToSidePanel,
-    args: [tab, markdownTitle]
-  });
-});
+// function sendTitleToSidePanel(tab, title) {
+//   console.log('点击浏览器地址栏右侧 icon');
+//   console.log(`markdownTitle: ${title}`);
+//   console.log(`Current Window ID: ${tab.windowId}`);
+// }
 
 
 // 添加右键菜单的事件监听
@@ -55,9 +43,12 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
     });
   }
 
-  if (info.menuItemId === 'mysidePanel') {
-    // chrome.sidePanel.open({ tabId: tab.id });
-    chrome.sidePanel.open({ windowId: tab.windowId });
+  if (info.menuItemId === "sendToSidePanel" && info.selectionText) {
+    chrome.sidePanel.setOptions({
+      path: "sidepanel.html"
+    }, () => {
+      chrome.runtime.sendMessage({ text: info.selectionText });
+    });
   }
 });
 
@@ -78,9 +69,16 @@ chrome.commands.onCommand.addListener((command) => {
 function copyPageInfoToClipboard() {
   var url = window.location.href;
   var title = document.title;
-  navigator.clipboard.writeText('来源：[' + title + '](' + url + ')');
+  var text = '来源：[' + title + '](' + url + ')';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text);
+  } else {
+    console.log('Clipboard API 只能在 HTTPS 或 localhost 环境下使用');
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+  }
 }
-
-
-
-

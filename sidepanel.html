@@ -2,16 +2,61 @@
 <html>
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Sidepanel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-      .custom-text {
-        font-size: 16px;
-        color: #333;
+      #sidepanelContent {
+        padding: 10px;
+      }
+      .text-block {
+        position: relative;
+        margin: 10px 0;
+        padding: 10px;
+        padding-right: 25px; 
+        /* Add padding to the top to make space for the button */
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .text-block p {
+        flex-grow: 1;
+        margin: 0;
+        padding-right: 10px;
+      }
+      .text-block .copy-button {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        padding: 3px 8px;
+        font-size: 12px;
+        border: none;
+        background: none;
+        cursor: pointer;
+      }
+      .text-block .copy-button i {
+        color: #00aaff;
+      }
+      .text-block .copy-button:active i,
+      .text-block .copy-button.active i {
+        color: #005f7f; /* 更深的蓝色作为按下效果 */
+      }
+      .text-block .delete-button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        padding: 3px 8px;
+        font-size: 12px;
+        border: none;
+        background: none;
+        cursor: pointer;
+      }
+      .text-block .delete-button i {
+        color: #ff0000;
       }
     </style>
   </head>
   <body>
-    <div id="custom-text-container"></div>
+    <div id="sidepanelContent"></div>
     <script src="sidepanel.js"></script>
   </body>
 </html>
