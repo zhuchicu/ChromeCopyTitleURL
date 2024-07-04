@@ -1,30 +1,34 @@
+// TODO
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('sidepanel.js 的监听页面加载完成事件');
-  const content = document.getElementById('sidepanelContent');
+  const sidepanelContent = document.getElementById('sidepanelContent');
+  if (sidepanelContent) {
+    console.log('Side panel is open');
+  } else {
+    console.log('Side panel is closed');
+  }
+});
 
-  // 接收来自背景脚本的消息
-  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    console.log('sidepanel.js 收到消息')
+// 接收来自背景脚本的消息
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  console.log(`sidePanel 收到消息：${request.action}`)
 
-    if (request.action === 'updateTexts') {
+  if (request.action === 'updateTexts') {
+    const text = request.text;
+    appendCustomText(text);
+    sendResponse({ status: 'success' }); // 返回响应
+    return true; // 以确保异步 sendResponse 可以工作
+  }
 
-      // 动态创建并插入自定义文本段
-      appendCustomText(content, request.text);
-      sendResponse({ status: 'success' }); // 返回响应
-      return true; // 以确保异步 sendResponse 可以工作
-    }
-
-    if (request.action === 'updateTitle') {
-      console.log('收到浏览器地址栏右侧 icon 点击事件')
-      document.title = request.text;
-      sendResponse({ status: 'Title updated' });
-      return true;
-    }
-  });
+  if (request.action === 'updateTitle') {
+    document.title = request.text;
+    sendResponse({ status: 'Title updated' });
+    return true;
+  }
 });
 
 
-function appendCustomText(ctx, text) {
+// 动态创建并插入自定义文本段
+function appendCustomText(text) {
   const div = document.createElement('div');
   div.className = 'text-block';
 
@@ -55,6 +59,8 @@ function appendCustomText(ctx, text) {
   });
   div.appendChild(delBtn);
 
-  ctx.appendChild(div);
+  // 将元素加入到 sidePanel 中
+  const content = document.getElementById('sidepanelContent');
+  content.appendChild(div);
 }
 

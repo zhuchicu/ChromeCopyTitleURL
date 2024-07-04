@@ -19,21 +19,6 @@ chrome.runtime.onInstalled.addListener(function () {
 });
 
 
-// function getMarkdownTitle(tab) {
-//   const title = tab.title;
-//   const url = tab.url;
-//   const markdownTitle = `[${title}](${url})`;
-//   return markdownTitle;
-// }
-
-
-// function sendTitleToSidePanel(tab, title) {
-//   console.log('点击浏览器地址栏右侧 icon');
-//   console.log(`markdownTitle: ${title}`);
-//   console.log(`Current Window ID: ${tab.windowId}`);
-// }
-
-
 // 添加右键菜单的事件监听
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
   if (info.menuItemId === 'copyPageURLTitle') {
@@ -44,12 +29,14 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
   }
 
   if (info.menuItemId === "sendToSidePanel" && info.selectionText) {
-    console.log(`contextMenus.onClicked: ${info.selectionText}`)
-    chrome.sidePanel.setOptions({
-      path: "sidepanel.html"
-    }, () => {
-      chrome.runtime.sendMessage({ action: 'updateTexts', text: info.selectionText });
-    });
+    (async () => {
+      try {
+        const text = await sendMsgToContent('formattedText', info.selectionText);
+        appendTextToSidePanel(text);
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    })();
   }
 });
 
@@ -67,6 +54,49 @@ chrome.commands.onCommand.addListener((command) => {
 });
 
 
+// 接收来自 content 脚本的消息
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  console.log(`background 收到消息：${request.action}`)
+
+  if (request.action === 'appendTextToSidePanel') {
+    appendTextToSidePanel(text);
+    return true;  // 或 sendResponse(true); 都可以
+  }
+});
+
+
+// TODO 未启用，待进一步重构优化
+function sendMsgToSidePanel(message) {
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage({ target: "sidepanel", content: message }, (response) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve(response);
+      }
+    });
+  });
+}
+
+
+// const response = await sendMsgToContent('hhh', 'background sendMsg');
+function sendMsgToContent(action, text) {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: action, text: text }, (response) => {
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError);
+          } else {
+            resolve(response.text);
+          }
+        });
+      }
+    });
+  });
+}
+
+
 function copyPageInfoToClipboard() {
   var url = window.location.href;
   var title = document.title;
@@ -82,4 +112,13 @@ function copyPageInfoToClipboard() {
     document.execCommand("copy");
     document.body.removeChild(textArea);
   }
+}
+
+
+function appendTextToSidePanel(text) {
+  chrome.sidePanel.setOptions({
+    path: "sidepanel.html"
+  }, () => {
+    chrome.runtime.sendMessage({ action: 'updateTexts', text: text });
+  });
 }

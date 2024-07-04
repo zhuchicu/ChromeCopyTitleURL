@@ -47,7 +47,7 @@
 //     }, 4000);
 //     floatingIcon.addEventListener('click', function() {
 //       // console.log('点击 logoIcon 时将文本发送至 SidePanel')
-//       sendToSidePanelPromise('updateTexts', cleanText).then(() => {
+//       sendMsgPromise('updateTexts', cleanText).then(() => {
 //         removeFloatingButton();
 //       });
 //     });
@@ -62,16 +62,6 @@
 //   }
 // });
 
-// // 创建一个浮动按钮
-// const icon = document.createElement('img');
-// icon.src = chrome.runtime.getURL('images/logo.jpg');
-// icon.id = 'selection-icon'
-// icon.alt = 'Copy to clipboard';
-// icon.style.display = 'none';
-// document.body.appendChild(icon);
-// // console.log(`icon.src=${icon.src}`);
-
-
 
 const icon = document.createElement('img');
 icon.src = chrome.runtime.getURL('images/logo.jpg');
@@ -81,10 +71,6 @@ icon.style.display = 'none';
 document.body.appendChild(icon);
 // console.log(`icon.src=${icon.src}`);
 
-
-function isSidePanelOpen() {
-  return !!document.getElementById('sidepanelContent'); // 假设 sidepanel 的 ID 为 sidepanel
-}
 
 // 创建一个浮动按钮
 function createFloatingButton(selectedText) {
@@ -98,7 +84,7 @@ function createFloatingButton(selectedText) {
 
 // 监听鼠标释放事件
 document.addEventListener('mouseup', function(event) {
-  console.log(`监听鼠标释放事件：${isSidePanelOpen()}`)
+  console.log(`监听鼠标释放事件`)
   const selectedText = window.getSelection().toString().trim();
   if (selectedText.length > 0) {
     const x = event.pageX + 10;
@@ -120,17 +106,35 @@ icon.addEventListener('click', function() {
   console.log('点击 logoIcon 时将文本发送至 SidePanel')
   const selectedText = window.getSelection().toString().trim();
   if (selectedText) {
-    const text = pangu.spacing(selectedText);
-    const cleanText = text.replace(/(\r\n|\n|\r)/gm, " ")        // 替换换行符为空格
-                          .replace(/^\s*$(?:\r\n|\r|\n)/gm, ""); // 删除空白行
-    sendToSidePanelPromise('updateTexts', cleanText).then(() => {
+    const text = formattedText(selectedText);
+    // 更新 sidepanel 的段落文本内容
+    sendMsgPromise('updateTexts', text).then(() => {
       icon.style.display = 'none';
     });
-    copyToClipboard(cleanText)
+    copyToClipboard(text);
   }
 });
 
-function sendToSidePanelPromise(action, text) {
+
+// 设置消息监听器
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log(`content 收到消息：${request.action}`)
+  // 格式化文本内容
+  if (request.action === 'formattedText') {
+    const responseText = formattedText(request.text);
+    sendResponse({ text: responseText });
+  }
+});
+
+
+function formattedText(selectedText) {
+  const text = pangu.spacing(selectedText);
+  const newText = text.replace(/(\r\n|\n|\r)/gm, " ")        // 替换换行符为空格
+                      .replace(/^\s*$(?:\r\n|\r|\n)/gm, ""); // 删除空白行
+  return newText
+}
+
+function sendMsgPromise(action, text) {
   return new Promise((resolve, reject) => {
     const message = {
       action: action,
