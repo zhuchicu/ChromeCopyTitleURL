@@ -44,10 +44,11 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
   }
 
   if (info.menuItemId === "sendToSidePanel" && info.selectionText) {
+    console.log(`contextMenus.onClicked: ${info.selectionText}`)
     chrome.sidePanel.setOptions({
       path: "sidepanel.html"
     }, () => {
-      chrome.runtime.sendMessage({ text: info.selectionText });
+      chrome.runtime.sendMessage({ action: 'updateTexts', text: info.selectionText });
     });
   }
 });
