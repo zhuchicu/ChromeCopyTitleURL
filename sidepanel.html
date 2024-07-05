@@ -22,6 +22,7 @@
         flex-grow: 1;
         margin: 0;
         padding-right: 10px;
+        min-height: 30px; /* 设置最小高度，确保单行文本时也有足够空间 */
       }
       .text-block .copy-button {
         position: absolute;
@@ -53,6 +54,20 @@
       .text-block .delete-button i {
         color: #ff0000;
       }
+      /* 当段落高度小于一定值时，调整按钮布局 */
+      @media (max-height: 60px) {
+        .button-container {
+          flex-direction: row;
+          width: auto;
+          height: 100%;
+        }
+
+        .top-button, .bottom-button {
+          height: 100%;
+          width: auto;
+        }
+      }
+
 
       #button-container {
         display: flex;
