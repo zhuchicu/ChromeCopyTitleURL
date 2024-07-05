@@ -53,10 +53,63 @@
       .text-block .delete-button i {
         color: #ff0000;
       }
+
+      #button-container {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        background-color: #f0f0f0;
+      }
+
+      #separator {
+        margin: 10px 0;
+        border: 0;
+        height: 1px;
+        background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+      }
+
+      #copy-all, #clear-all {
+        padding: 5px 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+
+      #copy-all:hover, #clear-all:hover {
+        background-color: #45a049;
+      }
+
+      #notification {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        text-align: center;
+      }
+
+      #notification.success {
+        background-color: #dff0d8;
+        color: #3c763d;
+      }
+
+      #notification.warning {
+        background-color: #fcf8e3;
+        color: #8a6d3b;
+      }
+
+      .hidden {
+        display: none !important;
+      }
     </style>
     <script src="sidepanel.js"></script>
   </head>
   <body>
+    <div id="button-container" class="hidden">
+      <button id="copy-all">Copy All</button>
+      <button id="clear-all">Clean All</button>
+    </div>
+    <hr id="separator" class="hidden">
+    <div id="notification" class="hidden"></div>
     <div id="sidepanelContent"></div>
   </body>
 </html>
