@@ -14,7 +14,7 @@ chrome.runtime.onInstalled.addListener(function () {
   chrome.contextMenus.create({
     id: 'sendToSidePanel',
     title: '发送 SidePanel',
-    contexts: ['selection']
+    contexts: ['selection', 'link', 'image']
   });
 });
 
@@ -28,16 +28,25 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
     });
   }
 
-  if (info.menuItemId === "sendToSidePanel" && info.selectionText) {
+  if (info.menuItemId === "sendToSidePanel") {
     (async () => {
       try {
-        const text = await sendMsgToContent('formattedText', info.selectionText);
+        var text;
+        // 选中文本
+        if (info.selectionText) {
+          text = await sendMsgToContent('formattedText', info.selectionText);
+        } else if (info.linkUrl) { // 选中 URL 链接
+          text = info.linkUrl;
+        } else if (info.srcUrl && (info.mediaType === 'image')) {
+          text = info.srcUrl;
+        }
         appendTextToSidePanel(text);
       } catch (error) {
         console.error("Error sending message:", error);
       }
     })();
   }
+
 });
 
 
