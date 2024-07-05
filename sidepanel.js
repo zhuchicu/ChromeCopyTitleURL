@@ -78,6 +78,27 @@ document.addEventListener('DOMContentLoaded', function() {
       notification.className = 'hidden';
     });
   });
+
+
+  // ==============================================================================================
+  // region: SidePanel 点击两个相邻段落文本之间实现合并
+  sidepanelContent.addEventListener('click', function(event) {
+    // console.log(`sidepanelContent click event.target: ${event.target.getAttribute('class')}`)
+    if (event.target.classList.contains('merge-area') || event.target.classList.contains('merge-icon')) {
+      const mergeArea = event.target.classList.contains('merge-area') ? event.target : event.target.parentElement;
+      const prevTextBlock = mergeArea.previousElementSibling;
+      const nextTextBlock = mergeArea.nextElementSibling;
+
+      if (prevTextBlock && nextTextBlock) { // 合并段落
+        prevTextBlock.firstElementChild.textContent += '。' + nextTextBlock.firstElementChild.textContent;
+        // 移除被合并的段落和点击的合并区域
+        sidepanelContent.removeChild(nextTextBlock);
+        sidepanelContent.removeChild(mergeArea);
+      }
+    }
+  });
+
+
 });
 
 // 接收来自背景脚本的消息
@@ -101,10 +122,23 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 // 动态创建并插入自定义文本段
 function appendCustomText(text) {
+  const content = document.getElementById('sidepanelContent');
+
+  // 在新段落之前添加一个合并区域
+  if (content.children.length > 0) {
+    const mergeArea = document.createElement('div');
+    mergeArea.classList.add('merge-area');
+    const mergeChain = document.createElement('i');
+    mergeChain.classList.add('fas', 'fa-link', 'merge-icon');
+    mergeArea.appendChild(mergeChain);
+    content.appendChild(mergeArea);
+  }
+
   const div = document.createElement('div');
   div.className = 'text-block';
 
   const p = document.createElement('p');
+  p.classList.add('paragraph');
   p.textContent = text;
   div.appendChild(p);
 
@@ -113,7 +147,8 @@ function appendCustomText(text) {
   copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
   copyBtn.className = 'copy-button';
   copyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(text);
+    const t = copyBtn.previousElementSibling.textContent;
+    navigator.clipboard.writeText(t);
     copyBtn.classList.add('active');
     setTimeout(() => {
       copyBtn.classList.remove('active');
@@ -132,7 +167,6 @@ function appendCustomText(text) {
   div.appendChild(delBtn);
 
   // 将元素加入到 sidePanel 中
-  const content = document.getElementById('sidepanelContent');
   content.appendChild(div);
 }
 
