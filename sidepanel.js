@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const separator = document.getElementById('separator');
 
   function updateButtonVisibility() {
-    if (sidepanelContent.children.length > 0) {
+    if (sidepanelContent.children.length > 1) {
       buttonContainer.classList.remove('hidden');
       separator.classList.remove('hidden');
     } else {
