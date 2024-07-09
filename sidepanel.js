@@ -176,17 +176,24 @@ function drop(event) {
     var data = event.dataTransfer.getData("text/plain");
     var draggedElement = document.getElementById(data);
     // 处理拖放逻辑
-    var targetElement = event.target.closest('.paragraph');
-    console.log(`处理拖放逻辑 data:${data}`)
-    console.log(`处理拖放逻辑 draggedElement:${draggedElement}`)
-    console.log(`处理拖放逻辑 targetElement:${targetElement}`)
+    var targetElement = event.target.closest('.text-block');
     if (targetElement) {
-      console.log(`处理拖放逻辑.parentNode:${targetElement.parentNode}`)
-        if (event.target.offsetTop < draggedElement.offsetTop) {
-            targetElement.parentNode.insertBefore(draggedElement, targetElement.nextSibling);
-        } else {
-            targetElement.parentNode.insertBefore(draggedElement, targetElement);
-        }
+      var draggedElemPrevMergeArea = draggedElement.previousSibling;
+      if (draggedElemPrevMergeArea) {
+        draggedElemPrevMergeArea.remove();
+      } else {
+        draggedElement.nextSibling.remove();
+      }
+
+      const mergeArea = createMegrArea();
+      // 拖拽对象在目标对象的上方
+      if (event.target.offsetTop > draggedElement.offsetTop) {
+        targetElement.parentNode.insertBefore(draggedElement, targetElement.nextSibling);
+        targetElement.parentNode.insertBefore(mergeArea, draggedElement);
+      } else {
+        targetElement.parentNode.insertBefore(draggedElement, targetElement);
+        targetElement.parentNode.insertBefore(mergeArea, targetElement);
+      }
     }
 }
 
