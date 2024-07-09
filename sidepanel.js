@@ -90,7 +90,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const nextTextBlock = mergeArea.nextElementSibling;
 
       if (prevTextBlock && nextTextBlock) { // 合并段落
-        prevTextBlock.firstElementChild.textContent += '。' + nextTextBlock.firstElementChild.textContent;
+        const split = endsWithPunctuation(prevTextBlock.firstElementChild.textContent) ? '' : '。'
+        prevTextBlock.firstElementChild.textContent += split + nextTextBlock.firstElementChild.textContent;
         // 移除被合并的段落和点击的合并区域
         sidepanelContent.removeChild(nextTextBlock);
         sidepanelContent.removeChild(mergeArea);
@@ -130,20 +131,8 @@ function appendCustomText(text) {
     content.appendChild(mergeArea);
   }
 
-  const div = document.createElement('div');
-  div.id = "text-block-" + generateUniqueId();
-  div.className = 'text-block';
-  div.setAttribute("draggable", "true");
-  div.addEventListener("dragstart", dragStart);
-  div.addEventListener("dragover", function(event) {
-    event.preventDefault(); // 阻止默认行为，允许放置拖动的内容
-  });
-  div.addEventListener("drop", drop);
-
-
-  const p = document.createElement('p');
-  p.classList.add('paragraph');
-  p.textContent = text;
+  const div = createTextBlock();
+  const p = createParagraphText(text);
   div.appendChild(p);
 
   const copyBtn = createCopyBtn();
@@ -154,6 +143,15 @@ function appendCustomText(text) {
 
   // 将元素加入到 sidePanel 中
   content.appendChild(div);
+}
+
+function endsWithPunctuation(text) {
+  // 定义一个正则表达式，用于匹配尾部的标点符号
+  const punctuationRegex = /[.,;:!?。，！？、；：]/; // 包含半角和全角标点符号
+  // 获取字符串的最后一个字符
+  const lastChar = text.slice(-1);
+  // 判断最后一个字符是否匹配正则表达式
+  return punctuationRegex.test(lastChar);
 }
 
 
@@ -195,6 +193,26 @@ function drop(event) {
         targetElement.parentNode.insertBefore(mergeArea, targetElement);
       }
     }
+}
+
+function createTextBlock() {
+  const div = document.createElement('div');
+  div.id = "text-block-" + generateUniqueId();
+  div.className = 'text-block';
+  div.setAttribute("draggable", "true");
+  div.addEventListener("dragstart", dragStart);
+  div.addEventListener("dragover", function(event) {
+    event.preventDefault(); // 阻止默认行为，允许放置拖动的内容
+  });
+  div.addEventListener("drop", drop);
+  return div;
+}
+
+function createParagraphText(text) {
+  const p = document.createElement('p');
+  p.classList.add('paragraph');
+  p.textContent = text;
+  return p;
 }
 
 function createMegrArea() {
