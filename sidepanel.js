@@ -212,7 +212,53 @@ function createParagraphText(text) {
   const p = document.createElement('p');
   p.classList.add('paragraph');
   p.textContent = text;
+  p.addEventListener('dblclick', function() {
+    // this.parentNode.setAttribute("draggable", "false");
+    const textarea = createTextArea(this.textContent, p);
+    // 用输入框替换段落
+    this.replaceWith(textarea);
+    textarea.focus();
+  });
   return p;
+}
+
+function createTextArea(text, inheritStyleElem) {
+  // 创建一个输入框并设置其初始值为当前段落的文本
+  const textarea = document.createElement('textarea');
+  textarea.type = 'text';
+  textarea.value = text;
+  textarea.className = 'editable-textarea';
+
+  // 获取 p 元素的样式并应用到 textarea 元素上
+  const computedStyle = window.getComputedStyle(inheritStyleElem);
+  textarea.style.width = computedStyle.width;
+  textarea.style.height = computedStyle.height;
+  textarea.style.font = computedStyle.font;
+  textarea.style.fontSize = computedStyle.fontSize;
+  textarea.style.fontWeight = computedStyle.fontWeight;
+  textarea.style.lineHeight = computedStyle.lineHeight;
+
+  function finishEditing() {
+    const newParagraphText = createParagraphText(textarea.value);
+    // 使用 setTimeout 延迟替换操作
+    setTimeout(() => {
+      textarea.replaceWith(newParagraphText);
+      // 确保新的段落获取焦点，以移除光标的显示
+      newParagraphText.focus();
+    });
+  }
+
+  // 监听输入框的失去焦点事件
+  textarea.addEventListener('blur', finishEditing);
+
+  // 监听输入框的回车键事件
+  textarea.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // 防止在 textarea 中输入回车
+      finishEditing();
+    }
+  });
+  return textarea;
 }
 
 function createMegrArea() {
