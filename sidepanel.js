@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
   copyAllBtn.addEventListener('click', function() {
     const text = Array.from(sidepanelContent.children)
                       .map(child => child.textContent)
-                      .join('\n\n');
+                      .join('\n');
     navigator.clipboard.writeText(text).then(function() {
       // alert('所有文本已复制到剪贴板');  // 不适用默认的弹窗
       showNotification('所有文本已复制到剪贴板', 'success');
@@ -126,24 +126,82 @@ function appendCustomText(text) {
 
   // 在新段落之前添加一个合并区域
   if (content.children.length > 0) {
-    const mergeArea = document.createElement('div');
-    mergeArea.classList.add('merge-area');
-    const mergeChain = document.createElement('i');
-    mergeChain.classList.add('fas', 'fa-link', 'merge-icon');
-    mergeArea.appendChild(mergeChain);
+    const mergeArea = createMegrArea();
     content.appendChild(mergeArea);
   }
 
   const div = document.createElement('div');
+  div.id = "text-block-" + generateUniqueId();
   div.className = 'text-block';
+  div.setAttribute("draggable", "true");
+  div.addEventListener("dragstart", dragStart);
+  div.addEventListener("dragover", function(event) {
+    event.preventDefault(); // 阻止默认行为，允许放置拖动的内容
+  });
+  div.addEventListener("drop", drop);
+
 
   const p = document.createElement('p');
   p.classList.add('paragraph');
   p.textContent = text;
   div.appendChild(p);
 
+  const copyBtn = createCopyBtn();
+  div.appendChild(copyBtn);
+
+  const delBtn = createDelBtn(div);
+  div.appendChild(delBtn);
+
+  // 将元素加入到 sidePanel 中
+  content.appendChild(div);
+}
+
+
+function generateUniqueId() {
+  // 全局计数器、时间戳，或第三方库或者自定义函数生成 UUID
+    return new Date().getTime();
+}
+
+// dragstart 事件处理函数
+function dragStart(event) {
+  // 在这里可以定义拖拽开始时的逻辑
+  event.dataTransfer.setData("text/plain", event.target.id);
+}
+
+// drop 函数实现
+function drop(event) {
+    event.preventDefault(); // 阻止默认行为
+
+    // 在这里可以处理拖放完成后的逻辑，比如获取拖放的数据、调整元素位置等
+    var data = event.dataTransfer.getData("text/plain");
+    var draggedElement = document.getElementById(data);
+    // 处理拖放逻辑
+    var targetElement = event.target.closest('.paragraph');
+    console.log(`处理拖放逻辑 data:${data}`)
+    console.log(`处理拖放逻辑 draggedElement:${draggedElement}`)
+    console.log(`处理拖放逻辑 targetElement:${targetElement}`)
+    if (targetElement) {
+      console.log(`处理拖放逻辑.parentNode:${targetElement.parentNode}`)
+        if (event.target.offsetTop < draggedElement.offsetTop) {
+            targetElement.parentNode.insertBefore(draggedElement, targetElement.nextSibling);
+        } else {
+            targetElement.parentNode.insertBefore(draggedElement, targetElement);
+        }
+    }
+}
+
+function createMegrArea() {
+  const mergeArea = document.createElement('div');
+  mergeArea.classList.add('merge-area');
+  const mergeChain = document.createElement('i');
+  mergeChain.classList.add('fas', 'fa-link', 'merge-icon');
+  mergeArea.appendChild(mergeChain);
+  return mergeArea;
+}
+
+function createCopyBtn() {
   const copyBtn = document.createElement('button');
-  // copyBtn.textContent = 'Copy';
+  // copyBtn.textContent = 'Copy';  // 不用文字，使用 icon
   copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
   copyBtn.className = 'copy-button';
   copyBtn.addEventListener('click', () => {
@@ -154,19 +212,18 @@ function appendCustomText(text) {
       copyBtn.classList.remove('active');
     }, 200); // 200ms 按下效果持续时间
   });
-  div.appendChild(copyBtn);
 
+  return copyBtn;
+}
+
+function createDelBtn(parent) {
   // 创建删除按钮 (使用 Font Awesome 图标)
   const delBtn = document.createElement('button');
-  // delBtn.textContent = 'Delete';
+  // delBtn.textContent = 'Delete';  // 不用文字，使用 icon
   delBtn.className = 'delete-button';
   delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
   delBtn.addEventListener('click', () => {
-    div.remove();
+    parent.remove();
   });
-  div.appendChild(delBtn);
-
-  // 将元素加入到 sidePanel 中
-  content.appendChild(div);
+  return delBtn;
 }
-
