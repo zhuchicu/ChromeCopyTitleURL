@@ -1,4 +1,7 @@
 chrome.runtime.onInstalled.addListener(function () {
+  // Page actions are disabled by default and enabled on select tabs
+  // chrome.action.disable();
+
   // console.log('注册右键菜单事件监听')
   // 注册右键菜单事件监听
   chrome.contextMenus.create({
@@ -8,7 +11,7 @@ chrome.runtime.onInstalled.addListener(function () {
   });
 
   // 打开侧栏
-  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+  // chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 
   // 注册右键菜单事件监听
   chrome.contextMenus.create({
@@ -70,6 +73,18 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'appendTextToSidePanel') {
     appendTextToSidePanel(text);
     return true;  // 或 sendResponse(true); 都可以
+  }
+
+  if (request.action === 'openSidePanel') {
+    chrome.windows.getLastFocused({ populate: true }, function(window) {
+      chrome.sidePanel.open({ windowId: window.id }, function() {
+        if (chrome.runtime.lastError) {
+          console.error('Error opening side panel:', chrome.runtime.lastError.message);
+        } else {
+          console.log('Side panel opened successfully');
+        }
+      });
+    });
   }
 });
 

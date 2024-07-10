@@ -4,8 +4,8 @@
   "version": "1.0",
   "description": "Excerpt Buckets",
   "action": {
-    "default_title": "Click to open Bucket"
-      // "default_popup": "popup.html"
+    "default_title": "ReadDraftHelper",
+    "default_popup": "popup/popup.html"
   },
   "content_scripts": [{
     "matches": ["<all_urls>"],
@@ -48,5 +48,6 @@
   }],
   "side_panel": {
     "default_path": "sidepanel.html"
-  }
+  },
+  "options_page": "options/options.html"
 }
