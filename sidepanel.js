@@ -1,11 +1,31 @@
-// TODO
+let backgroundPort;
+function connectToBackground() {
+  backgroundPort = chrome.runtime.connect({name: "sidepanel-connection"});
+
+  backgroundPort.onMessage.addListener(function(msg) {
+    // console.log("Received message from background:", msg);
+    
+    // 处理来自背景脚本的消息
+    if (msg.action === 'updateTexts') {
+      appendCustomText(formattedText(msg.text));
+    }
+
+    if (msg.action === 'updateTitle') {
+      document.title = msg.text;
+    }
+
+  });
+
+  backgroundPort.onDisconnect.addListener(function() {
+    // console.log("Disconnected from background. Attempting to reconnect...");
+    setTimeout(connectToBackground, 1000);  // 1秒后尝试重新连接
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+  connectToBackground();
+
   const sidepanelContent = document.getElementById('sidepanelContent');
-  if (sidepanelContent) {
-    console.log('Side panel is open');
-  } else {
-    console.log('Side panel is closed');
-  }
 
   // ==============================================================================================
   // region: 只会在 sidepanel 有段落文本时才会显示，否则将隐藏起来
@@ -101,25 +121,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 });
-
-// 接收来自背景脚本的消息
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  console.log(`sidePanel 收到消息：${request.action}`)
-
-  if (request.action === 'updateTexts') {
-    const text = request.text;
-    appendCustomText(text);
-    sendResponse({ status: 'success' }); // 返回响应
-    return true; // 以确保异步 sendResponse 可以工作
-  }
-
-  if (request.action === 'updateTitle') {
-    document.title = request.text;
-    sendResponse({ status: 'Title updated' });
-    return true;
-  }
-});
-
 
 // 动态创建并插入自定义文本段
 function appendCustomText(text) {
@@ -297,4 +298,11 @@ function createDelBtn(parent) {
     parent.remove();
   });
   return delBtn;
+}
+
+function formattedText(selectedText) {
+  const text = pangu.spacing(selectedText);
+  const newText = text.replace(/(\r\n|\n|\r)/gm, " ")        // 替换换行符为空格
+                      .replace(/^\s*$(?:\r\n|\r|\n)/gm, ""); // 删除空白行
+  return newText
 }

@@ -1,7 +1,6 @@
-chrome.runtime.onInstalled.addListener(function () {
-  // Page actions are disabled by default and enabled on select tabs
-  // chrome.action.disable();
+let sidePanelPort;
 
+chrome.runtime.onInstalled.addListener(function () {
   // console.log('注册右键菜单事件监听')
   // 注册右键菜单事件监听
   chrome.contextMenus.create({
@@ -10,9 +9,6 @@ chrome.runtime.onInstalled.addListener(function () {
     contexts: ['page']
   });
 
-  // 打开侧栏
-  // chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
-
   // 注册右键菜单事件监听
   chrome.contextMenus.create({
     id: 'sendToSidePanel',
@@ -20,7 +16,6 @@ chrome.runtime.onInstalled.addListener(function () {
     contexts: ['selection', 'link', 'image']
   });
 });
-
 
 // 添加右键菜单的事件监听
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
@@ -32,22 +27,15 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
   }
 
   if (info.menuItemId === "sendToSidePanel") {
-    (async () => {
-      try {
-        var text;
-        // 选中文本
-        if (info.selectionText) {
-          text = await sendMsgToContent('formattedText', info.selectionText);
-        } else if (info.linkUrl) { // 选中 URL 链接
-          text = info.linkUrl;
-        } else if (info.srcUrl && (info.mediaType === 'image')) {
-          text = info.srcUrl;
-        }
-        appendTextToSidePanel(text);
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
-    })();
+    const send = () => {
+      var text = getSelectedText(info);
+      sendMsgToSidePanel('updateTexts', text);
+    };
+    if (sidePanelPort) {
+      send();
+    } else {
+      openSidePanel(send);
+    }
   }
 
 });
@@ -68,58 +56,94 @@ chrome.commands.onCommand.addListener((command) => {
 
 // 接收来自 content 脚本的消息
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  console.log(`background 收到消息：${request.action}`)
+  // console.log(`background 收到消息：${request.action}`)
 
   if (request.action === 'appendTextToSidePanel') {
-    appendTextToSidePanel(text);
-    return true;  // 或 sendResponse(true); 都可以
+    sendMsgToSidePanel('updateTexts', text);
   }
 
   if (request.action === 'openSidePanel') {
-    chrome.windows.getLastFocused({ populate: true }, function(window) {
-      chrome.sidePanel.open({ windowId: window.id }, function() {
-        if (chrome.runtime.lastError) {
-          console.error('Error opening side panel:', chrome.runtime.lastError.message);
-        } else {
-          console.log('Side panel opened successfully');
-        }
-      });
-    });
+    openSidePanel();
   }
 });
 
+function getSelectedText(info) {
+  var text;
+  // 选中文本
+  if (info.selectionText) {
+    text = info.selectionText;
+  } else if (info.linkUrl) { // 选中 URL 链接
+    text = info.linkUrl;
+  } else if (info.srcUrl && (info.mediaType === 'image')) {
+    text = info.srcUrl;
+  }
+  return text;
+}
 
-// TODO 未启用，待进一步重构优化
-function sendMsgToSidePanel(message) {
-  return new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage({ target: "sidepanel", content: message }, (response) => {
+function openSidePanel(callback=null) {
+  chrome.windows.getLastFocused({ populate: true }, function(window) {
+    chrome.sidePanel.open({ windowId: window.id }, function() {
       if (chrome.runtime.lastError) {
-        reject(chrome.runtime.lastError);
+        console.error('Error opening side panel:', chrome.runtime.lastError.message);
       } else {
-        resolve(response);
+        // console.log('Side panel opened successfully');
+        connSidePanel(callback);
       }
     });
   });
 }
 
 
-// const response = await sendMsgToContent('hhh', 'background sendMsg');
-function sendMsgToContent(action, text) {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: action, text: text }, (response) => {
-          if (chrome.runtime.lastError) {
-            reject(chrome.runtime.lastError);
-          } else {
-            resolve(response.text);
-          }
-        });
+function connSidePanel(callback=null) {
+  chrome.runtime.onConnect.addListener(function(port) {
+    if (port.name === "sidepanel-connection") {
+      // console.log("Side panel connected");
+      sidePanelPort = port;
+      if (callback) {
+        callback();
       }
-    });
+
+      sidePanelPort.onMessage.addListener(function(msg) {
+        console.log("Received message from side panel:", msg);
+        // 处理来自侧边栏的消息
+        // if (msg.action === "getData") {
+        //   sidePanelPort.postMessage({data: "Here's some data from background"});
+        // }
+      });
+
+      sidePanelPort.onDisconnect.addListener(function() {
+        // console.log("Side panel disconnected");
+        sidePanelPort = null;
+      });
+    }
   });
 }
 
+// 向侧边栏发送消息的函数
+function sendMsgToSidePanel(action, text) {
+  if (sidePanelPort) {
+    sidePanelPort.postMessage({action: action, text: text});
+  } else {
+    console.error("Side panel is not connected");
+  }
+}
+
+
+// function sendMsgToContent(action, text) {
+//   return new Promise((resolve, reject) => {
+//     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+//       if (tabs[0]) {
+//         chrome.tabs.sendMessage(tabs[0].id, { action: action, text: text }, (response) => {
+//           if (chrome.runtime.lastError) {
+//             reject(chrome.runtime.lastError);
+//           } else {
+//             resolve(response.text);
+//           }
+//         });
+//       }
+//     });
+//   });
+// }
 
 function copyPageInfoToClipboard() {
   var url = window.location.href;
@@ -136,13 +160,4 @@ function copyPageInfoToClipboard() {
     document.execCommand("copy");
     document.body.removeChild(textArea);
   }
-}
-
-
-function appendTextToSidePanel(text) {
-  chrome.sidePanel.setOptions({
-    path: "sidepanel.html"
-  }, () => {
-    chrome.runtime.sendMessage({ action: 'updateTexts', text: text });
-  });
 }

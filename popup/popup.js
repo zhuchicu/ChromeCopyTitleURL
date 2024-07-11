@@ -13,18 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
   optionBtn.addEventListener('click', function () {
     chrome.runtime.openOptionsPage();
   });
-
-  // chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-  //   var tab = tabs[0];
-  //   chrome.scripting.executeScript({
-  //     target: { tabId: tab.id },
-  //     function: function () {
-  //       document.addEventListener('contextmenu', function (event) {
-  //         chrome.runtime.sendMessage({ type: 'showContextMenu' });
-  //       });
-  //     }
-  //   });
-  // });
 });
 
 function copyPageInfo(callback) {
