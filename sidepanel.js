@@ -227,7 +227,22 @@ function createTextBlock() {
     event.preventDefault(); // 阻止默认行为，允许放置拖动的内容
   });
   div.addEventListener("drop", drop);
+  div.addEventListener("click", clickTextBlock);
   return div;
+}
+
+let focusParagraph;
+function clickTextBlock(event) {
+  let node = event.target;
+  while (node && node.nodeName === "P") {
+    node = node.parentNode;
+  }
+  if (focusParagraph && focusParagraph === node) {
+    node.style.border = "1px solid red";
+  } else {
+    node.style.border = "1px solid #ccc";
+    focusParagraph = node;
+  }
 }
 
 function createParagraphText(text) {
