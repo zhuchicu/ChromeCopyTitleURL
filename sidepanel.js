@@ -246,6 +246,9 @@ function createTextArea(text, inheritStyleElem) {
       textarea.replaceWith(newParagraphText);
       // 确保新的段落获取焦点，以移除光标的显示
       newParagraphText.focus();
+      if (newParagraphText && !Boolean(newParagraphText.textContent)) {
+        delTextBlock(newParagraphText.parentNode);
+      }
     });
   }
 
@@ -294,19 +297,23 @@ function createDelBtn(parent) {
   // delBtn.textContent = 'Delete';  // 不用文字，使用 icon
   delBtn.className = 'delete-button';
   delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-  delBtn.addEventListener('click', () => {
-    const prevMergeArea = parent.previousElementSibling;
-    const nextMergeArea = parent.nextElementSibling;
-    if (nextMergeArea) {
-      nextMergeArea.remove();
+  delBtn.addEventListener('click', () => delTextBlock(parent));
+  return delBtn;
+}
+
+function delTextBlock(block) {
+  if (block) {
+    const next = block.nextElementSibling;
+    const prev = block.previousElementSibling;
+    if (next) {
+      next.remove();
     } else {
-      if (prevMergeArea) {
-        prevMergeArea.remove();
+      if (prev) {
+        prev.remove();
       }
     }
-    parent.remove();
-  });
-  return delBtn;
+    block.remove();
+  }
 }
 
 function formattedText(selectedText) {
