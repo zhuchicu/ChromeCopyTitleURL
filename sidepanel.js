@@ -181,7 +181,9 @@ function drop(event) {
       if (draggedElemPrevMergeArea) {
         draggedElemPrevMergeArea.remove();
       } else {
-        draggedElement.nextSibling.remove();
+        if (draggedElement.nextSibling) {
+          draggedElement.nextSibling.remove();
+        }
       }
 
       const mergeArea = createMegrArea();
