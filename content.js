@@ -19,20 +19,25 @@ function createFloatingButton(selectedText) {
 
 // 监听鼠标释放事件
 document.addEventListener('mouseup', function(event) {
-  console.log(`监听鼠标释放事件`)
-  const selectedText = window.getSelection().toString().trim();
-  if (selectedText.length > 0) {
-    const x = event.pageX + 10;
-    const y = event.pageY + 10;
-    icon.style.left = `${x}px`;
-    icon.style.top = `${y}px`;
-    icon.style.display = 'block';
-    setTimeout(function() {
+  // console.log(`监听鼠标释放事件`)
+  if (event.button === 1) {
+    const selectedText = window.getSelection().toString().trim();
+    if (selectedText.length > 0) {
+      const x = event.pageX + 10;
+      const y = event.pageY + 10;
+      icon.style.left = `${x}px`;
+      icon.style.top = `${y}px`;
+      icon.style.display = 'block';
+      setTimeout(function() {
+        icon.style.display = 'none';
+      }, 4000);
+    } else {
       icon.style.display = 'none';
-    }, 4000);
-  } else {
-    icon.style.display = 'none';
+    }
   }
+
+  // if (event.button === 2) {
+  // }
 });
 
 

@@ -28,8 +28,21 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
 
   if (info.menuItemId === "sendToSidePanel") {
     const send = () => {
-      var text = getSelectedText(info);
-      sendMsgToSidePanel('updateTexts', text);
+      // 选中文本
+      if (info.selectionText) {
+        getSelectionText();
+      } else {
+        let fragments = [];
+        if (info.linkUrl) { // 选中 URL 链接
+          const t = `<${info.linkUrl}>`;
+          fragments.push(t);
+        } else if (info.srcUrl && (info.mediaType === 'image')) {
+          const t = `![](${info.srcUrl})`;
+          fragments.push(t);
+        }
+        sendMsgToSidePanel({action: 'paragraphs', fragments: fragments});
+      }
+
     };
     if (sidePanelPort) {
       send();
@@ -59,7 +72,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // console.log(`background 收到消息：${request.action}`)
 
   if (request.action === 'appendTextToSidePanel') {
-    sendMsgToSidePanel('updateTexts', text);
+    sendMsgToSidePanel({action: 'updateTexts', text: text});
   }
 
   if (request.action === 'openSidePanel') {
@@ -67,18 +80,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
 });
 
-function getSelectedText(info) {
-  var text;
-  // 选中文本
-  if (info.selectionText) {
-    text = info.selectionText;
-  } else if (info.linkUrl) { // 选中 URL 链接
-    text = `<${info.linkUrl}>`;
-  } else if (info.srcUrl && (info.mediaType === 'image')) {
-    text = `![](${info.srcUrl})`;
-  }
-  return text;
-}
 
 function openSidePanel(callback=null) {
   chrome.windows.getLastFocused({ populate: true }, function(window) {
@@ -120,9 +121,9 @@ function connSidePanel(callback=null) {
 }
 
 // 向侧边栏发送消息的函数
-function sendMsgToSidePanel(action, text) {
+function sendMsgToSidePanel(msg) {
   if (sidePanelPort) {
-    sidePanelPort.postMessage({action: action, text: text});
+    sidePanelPort.postMessage(msg);
   } else {
     console.error("Side panel is not connected");
   }
@@ -160,4 +161,34 @@ function copyPageInfoToClipboard() {
     document.execCommand("copy");
     document.body.removeChild(textArea);
   }
+}
+
+function getSelectionText() {
+  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    let tabId = tabs[0].id;
+    chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      func: splitSelectionByParagraphs
+    }).then(response => {
+      let fragments = response[0].result.fragments;
+      sendMsgToSidePanel({action: 'paragraphs', fragments: fragments});
+    });
+  });
+}
+
+function splitSelectionByParagraphs() {
+  let selection = window.getSelection();
+  if (selection.rangeCount === 0) {
+    return { fragments: [] };
+  }
+
+  let range = selection.getRangeAt(0);
+  let fragments = [];
+  let fragmentParent = range.cloneContents();
+  fragmentParent.childNodes.forEach(function(item) {
+    let text = item.textContent;
+    fragments.push(text);
+  });
+
+  return { fragments: fragments };
 }

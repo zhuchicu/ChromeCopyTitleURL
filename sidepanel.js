@@ -3,11 +3,19 @@ function connectToBackground() {
   backgroundPort = chrome.runtime.connect({name: "sidepanel-connection"});
 
   backgroundPort.onMessage.addListener(function(msg) {
-    // console.log("Received message from background:", msg);
+    console.log("Received message from background:", msg, msg.action);
     
     // 处理来自背景脚本的消息
     if (msg.action === 'updateTexts') {
       appendCustomText(formattedText(msg.text));
+    }
+
+    if (msg.action === 'paragraphs') {
+      console.log(`paragraphs.length: ${msg.fragments.length}`);
+      msg.fragments.forEach(function(item) {
+        const t = formattedText(item);
+        appendCustomText(t);
+      });
     }
 
     if (msg.action === 'updateTitle') {
@@ -318,9 +326,9 @@ function delTextBlock(block) {
   }
 }
 
-function formattedText(selectedText) {
-  const text = pangu.spacing(selectedText);
-  const newText = text.replace(/(\r\n|\n|\r)/gm, " ")        // 替换换行符为空格
+function formattedText(text) {
+  const t = pangu.spacing(text);
+  const newText = t.replace(/(\r\n|\n|\r)/gm, " ")        // 替换换行符为空格
                       .replace(/^\s*$(?:\r\n|\r|\n)/gm, ""); // 删除空白行
   return newText
 }
