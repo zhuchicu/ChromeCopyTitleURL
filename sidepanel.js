@@ -136,7 +136,47 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
 
+
+  const contextMenu = document.getElementById('contextMenu');
+  const customOption = document.getElementById('customOption');
+
+  document.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+    const isParagraph = (event.target === focusParagraph) || (event.target.parentNode === focusParagraph)
+    if (focusParagraph && isParagraph) {
+      contextMenu.style.display = 'block';
+      contextMenu.style.left = `${event.pageX}px`;
+      contextMenu.style.top = `${event.pageY}px`;
+    }
+  });
+
+  document.addEventListener('click', () => {
+    contextMenu.style.display = 'none';
+  });
+
+  customOption.addEventListener('click', () => {
+    // alert('自定义选项被点击');
+    insertCustomText(focusParagraph, "");
+  });
 });
+
+function insertCustomText(sibling, text) {
+  const mergeArea = createMergeArea();
+  const content = document.getElementById('sidepanelContent');
+  content.insertBefore(mergeArea, sibling.nextSibling);
+
+  const div = createTextBlock();
+  const p = createParagraphText(text);
+  div.appendChild(p);
+
+  const copyBtn = createCopyBtn();
+  div.appendChild(copyBtn);
+
+  const delBtn = createDelBtn(div);
+  div.appendChild(delBtn);
+
+  content.insertBefore(div, mergeArea.nextSibling);
+}
 
 // 动态创建并插入自定义文本段
 function appendCustomText(text) {
@@ -231,17 +271,22 @@ function createTextBlock() {
   return div;
 }
 
-let focusParagraph;
+let focusParagraph = null;
 function clickTextBlock(event) {
   let node = event.target;
   while (node && node.nodeName === "P") {
     node = node.parentNode;
   }
-  if (focusParagraph && focusParagraph === node) {
-    node.style.border = "1px solid red";
+
+  if (focusParagraph) {
+    focusParagraph.style.border = "1px solid #ccc";
+  }
+
+  if (focusParagraph === node) {
+    focusParagraph = null;
   } else {
-    node.style.border = "1px solid #ccc";
     focusParagraph = node;
+    focusParagraph.style.border = "1px solid red"; 
   }
 }
 

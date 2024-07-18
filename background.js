@@ -15,6 +15,8 @@ chrome.runtime.onInstalled.addListener(function () {
     title: '发送 SidePanel',
     contexts: ['selection', 'link', 'image']
   });
+
+
 });
 
 // 添加右键菜单的事件监听
@@ -50,6 +52,7 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
       openSidePanel(send);
     }
   }
+
 
 });
 
