@@ -295,6 +295,15 @@ function createDelBtn(parent) {
   delBtn.className = 'delete-button';
   delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
   delBtn.addEventListener('click', () => {
+    const prevMergeArea = parent.previousElementSibling;
+    const nextMergeArea = parent.nextElementSibling;
+    if (nextMergeArea) {
+      nextMergeArea.remove();
+    } else {
+      if (prevMergeArea) {
+        prevMergeArea.remove();
+      }
+    }
     parent.remove();
   });
   return delBtn;
