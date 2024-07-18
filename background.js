@@ -73,9 +73,9 @@ function getSelectedText(info) {
   if (info.selectionText) {
     text = info.selectionText;
   } else if (info.linkUrl) { // 选中 URL 链接
-    text = info.linkUrl;
+    text = `<${info.linkUrl}>`;
   } else if (info.srcUrl && (info.mediaType === 'image')) {
-    text = info.srcUrl;
+    text = `![](${info.srcUrl})`;
   }
   return text;
 }
