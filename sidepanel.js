@@ -118,8 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const nextTextBlock = mergeArea.nextElementSibling;
 
       if (prevTextBlock && nextTextBlock) { // 合并段落
-        const split = endsWithPunctuation(prevTextBlock.firstElementChild.textContent) ? '' : '。'
-        prevTextBlock.firstElementChild.textContent += split + nextTextBlock.firstElementChild.textContent;
+        const prevBlockText = prevTextBlock.firstElementChild.textContent
+        // const split = endsWithPunctuation(prevBlockText) ? '' : '。'
+        prevTextBlock.firstElementChild.textContent += prevBlockText + nextTextBlock.firstElementChild.textContent;
         // 移除被合并的段落和点击的合并区域
         sidepanelContent.removeChild(nextTextBlock);
         sidepanelContent.removeChild(mergeArea);
@@ -136,7 +137,7 @@ function appendCustomText(text) {
 
   // 在新段落之前添加一个合并区域
   if (content.children.length > 0) {
-    const mergeArea = createMegrArea();
+    const mergeArea = createMergeArea();
     content.appendChild(mergeArea);
   }
 
@@ -154,14 +155,14 @@ function appendCustomText(text) {
   content.appendChild(div);
 }
 
-function endsWithPunctuation(text) {
-  // 定义一个正则表达式，用于匹配尾部的标点符号
-  const punctuationRegex = /[.,;:!?。，！？、；：]/; // 包含半角和全角标点符号
-  // 获取字符串的最后一个字符
-  const lastChar = text.slice(-1);
-  // 判断最后一个字符是否匹配正则表达式
-  return punctuationRegex.test(lastChar);
-}
+// function endsWithPunctuation(text) {
+//   // 定义一个正则表达式，用于匹配尾部的标点符号
+//   const punctuationRegex = /[.,;:!?。，！？、；：]/; // 包含半角和全角标点符号
+//   // 获取字符串的最后一个字符
+//   const lastChar = text.slice(-1);
+//   // 判断最后一个字符是否匹配正则表达式
+//   return punctuationRegex.test(lastChar);
+// }
 
 
 function generateUniqueId() {
@@ -194,7 +195,7 @@ function drop(event) {
         }
       }
 
-      const mergeArea = createMegrArea();
+      const mergeArea = createMergeArea();
       // 拖拽对象在目标对象的上方
       if (event.target.offsetTop > draggedElement.offsetTop) {
         targetElement.parentNode.insertBefore(draggedElement, targetElement.nextSibling);
@@ -275,7 +276,7 @@ function createTextArea(text, inheritStyleElem) {
   return textarea;
 }
 
-function createMegrArea() {
+function createMergeArea() {
   const mergeArea = document.createElement('div');
   mergeArea.classList.add('merge-area');
   const mergeChain = document.createElement('i');
