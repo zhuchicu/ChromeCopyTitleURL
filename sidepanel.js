@@ -3,7 +3,7 @@ function connectToBackground() {
   backgroundPort = chrome.runtime.connect({name: "sidepanel-connection"});
 
   backgroundPort.onMessage.addListener(function(msg) {
-    console.log("Received message from background:", msg, msg.action);
+    // console.log("Received message from background:", msg, msg.action);
     
     // 处理来自背景脚本的消息
     if (msg.action === 'updateTexts') {
@@ -11,7 +11,7 @@ function connectToBackground() {
     }
 
     if (msg.action === 'paragraphs') {
-      console.log(`paragraphs.length: ${msg.fragments.length}`);
+      // console.log(`paragraphs.length: ${msg.fragments.length}`);
       msg.fragments.forEach(function(item) {
         const t = formattedText(item);
         appendCustomText(t);
@@ -25,7 +25,7 @@ function connectToBackground() {
   });
 
   backgroundPort.onDisconnect.addListener(function() {
-    // console.log("Disconnected from background. Attempting to reconnect...");
+    console.log("Disconnected from background. Attempting to reconnect...");
     setTimeout(connectToBackground, 1000);  // 1秒后尝试重新连接
   });
 }
@@ -133,6 +133,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 动态创建并插入自定义文本段
 function appendCustomText(text) {
+  if (!Boolean(text)) {
+    return;
+  }
   const content = document.getElementById('sidepanelContent');
 
   // 在新段落之前添加一个合并区域
