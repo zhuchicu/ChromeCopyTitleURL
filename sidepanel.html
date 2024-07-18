@@ -149,11 +149,29 @@
         background: none; /* 去掉输入框的背景颜色 */
         resize: none; /* 禁止拖动调整大小 */
       }
+
+      .readme {
+        color: #808080;
+        opacity: 0.5;
+      }
     </style>
     <script src="sidepanel.js"></script>
     <script src="vendors/pangu.min.js"></script>
   </head>
   <body>
+    <div id="readmeContent">
+      <p class="readme">
+        <span>右键菜单复制页面 Markdown URL</span>
+        <br>
+        <span>右键选中文本发送至此</span>
+        <br>
+        <span>发送超链接至此</span>
+        <br>
+        <span>发送图片链接至此</span>
+        <br>
+        <span>卡片内容支持合并</span>
+      </p>
+    </div>
     <div id="button-container" class="hidden">
       <button id="copy-all">Copy All</button>
       <button id="clear-all">Clean All</button>

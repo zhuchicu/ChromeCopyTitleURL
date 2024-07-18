@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // region: 只会在 sidepanel 有段落文本时才会显示，否则将隐藏起来
   const buttonContainer = document.getElementById('button-container');
   const separator = document.getElementById('separator');
+  const readmeContent = document.getElementById('readmeContent');
 
   function updateButtonVisibility() {
     if (sidepanelContent.children.length > 1) {
@@ -47,6 +48,12 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       buttonContainer.classList.add('hidden');
       separator.classList.add('hidden');
+    }
+
+    if (sidepanelContent.children.length === 0) {
+      readmeContent.classList.remove('hidden');
+    } else {
+      readmeContent.classList.add('hidden');
     }
   }
 
