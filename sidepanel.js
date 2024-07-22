@@ -125,9 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const nextTextBlock = mergeArea.nextElementSibling;
 
       if (prevTextBlock && nextTextBlock) { // 合并段落
-        const prevBlockText = prevTextBlock.firstElementChild.textContent
+        // const prevBlockText = prevTextBlock.firstElementChild.textContent
         // const split = endsWithPunctuation(prevBlockText) ? '' : '。'
-        prevTextBlock.firstElementChild.textContent += prevBlockText + nextTextBlock.firstElementChild.textContent;
+        prevTextBlock.firstElementChild.textContent += nextTextBlock.firstElementChild.textContent;
         // 移除被合并的段落和点击的合并区域
         sidepanelContent.removeChild(nextTextBlock);
         sidepanelContent.removeChild(mergeArea);
